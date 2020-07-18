@@ -246,9 +246,9 @@ public class Octree {
             return null;
         }
 
-        if (!Frustum.getFrustum(updateFrustum, projectionMatrix, viewMatrix).nodeInFrustum(node.min, node.size)){
-            return null;
-        }
+//        if (!Frustum.getFrustum(updateFrustum, projectionMatrix, viewMatrix).nodeInFrustum(node.min, node.size)){
+//            return null;
+//        }
 
         if (node.size == 1) {
             return ConstructLeaf(node);

@@ -1,4 +1,4 @@
-package dc;
+package simpleDualContouring;
 
 import core.math.Vec3i;
 

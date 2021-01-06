@@ -1,15 +1,15 @@
-package dc;
+package simpleDualContouring;
 
 import core.math.Vec3f;
 import core.math.Vec3i;
 import core.math.Vec4f;
-import dc.solver.LevenQefSolver;
-import dc.solver.QEFData;
-import dc.utils.SimplexNoise;
+import solver.LevenQefSolver;
+import solver.QEFData;
+import utils.SimplexNoise;
 
 import java.util.List;
 
-import static dc.OctreeNodeType.*;
+import static simpleDualContouring.OctreeNodeType.*;
 
 public class SimpleDualContouring {
     public static final int MATERIAL_AIR = 0;

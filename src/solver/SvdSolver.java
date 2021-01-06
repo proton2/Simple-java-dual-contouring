@@ -1,4 +1,4 @@
-package dc.solver;
+package solver;
 
 import core.math.Vec4f;
 

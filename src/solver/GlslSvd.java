@@ -1,4 +1,4 @@
-package dc.solver;
+package solver;
 
 import core.math.Vec2f;
 import core.math.Vec3f;
@@ -7,7 +7,7 @@ import core.math.Vec4f;
 /**
  * Created by proton2 on 01.02.2020.
  */
-public class GlslSvd implements dc.solver.SvdSolver {
+public class GlslSvd implements solver.SvdSolver {
 
     private final int SVD_NUM_SWEEPS = 5;
     private final float Tiny_Number = (float) 1.e-20;

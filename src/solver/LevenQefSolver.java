@@ -1,10 +1,10 @@
-package dc.solver;
+package solver;
 
 import core.math.Vec2f;
 import core.math.Vec3f;
 import core.math.Vec4f;
 
-public class LevenQefSolver implements dc.solver.SvdSolver {
+public class LevenQefSolver implements solver.SvdSolver {
     int SVD_NUM_SWEEPS = 10;
     float PSUEDO_INVERSE_THRESHOLD = 0.1f;
 

@@ -1,10 +1,10 @@
-package dc;
+package simpleDualContouring;
 
 import java.util.List;
 
-import static dc.SimpleDualContouring.MATERIAL_AIR;
-import static dc.SimpleDualContouring.edgevmap;
-import static dc.OctreeNodeType.*;
+import static simpleDualContouring.SimpleDualContouring.MATERIAL_AIR;
+import static simpleDualContouring.SimpleDualContouring.edgevmap;
+import static simpleDualContouring.OctreeNodeType.*;
 
 public class Dc {
     private static int[][] cellProcFaceMask = {{0,4,0},{1,5,0},{2,6,0},{3,7,0},{0,2,1},{4,6,1},{1,3,1},{5,7,1},{0,1,2},{2,3,2},{4,5,2},{6,7,2}} ;

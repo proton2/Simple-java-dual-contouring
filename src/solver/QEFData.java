@@ -1,4 +1,4 @@
-package dc.solver;
+package solver;
 
 import core.math.Vec3f;
 import core.math.Vec4f;
@@ -8,7 +8,7 @@ public class QEFData {
     public Vec4f atb;
     public Vec4f massPoint;
     public Vec4f x;
-    private dc.solver.SvdSolver solver;
+    private solver.SvdSolver solver;
     private float btb;
 
     public Vec4f getMasspoint() {
@@ -23,7 +23,7 @@ public class QEFData {
         return x;
     }
 
-    public QEFData(dc.solver.SvdSolver solver) {
+    public QEFData(solver.SvdSolver solver) {
         mat3x3_tri_ATA = new float[6];
         atb = new Vec4f();
         massPoint = new Vec4f();
@@ -119,7 +119,7 @@ public class QEFData {
 
     public static void main(String[] args) {
         Vec4f pointaccum = new Vec4f(0,0,0,0);
-        QEFData solver = new QEFData(new dc.solver.GlslSvd());
+        QEFData solver = new QEFData(new solver.GlslSvd());
 
         final int count = 5;
         Vec4f[] normals = {

@@ -1,8 +1,8 @@
-package dc;
+package simpleDualContouring;
 
 import core.math.Vec3f;
 import core.math.Vec4f;
-import dc.solver.QEFData;
+import solver.QEFData;
 
 public class OctreeDrawInfo {
     public int index;

@@ -27,14 +27,10 @@ public class DcSimpleShader extends Shader{
     compileShader();
 
     addUniform("modelViewProjectionMatrix");
-    //addUniform("useUniformColour");
-    //addUniform("worldMatrix");
   }
 
   public void updateUniforms(GameObject object)
   {
     setUniform("modelViewProjectionMatrix", object.getTransform().getModelViewProjectionMatrix());
-    //setUniformi("useUniformColour", 1);
-    //setUniform("worldMatrix", object.getTransform().getWorldMatrix());
   }
 }

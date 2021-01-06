@@ -1,6 +1,7 @@
 #version 330
 
 layout (location = 0) in vec3 position0;
+layout (location = 2) in vec3 color2;
 
 uniform mat4 modelViewProjectionMatrix;
 
@@ -10,8 +11,7 @@ smooth out vec3 vertexNormal;
 
 void main()
 {
-    vertexColour = vec3(0.7f, 0.f, 0.f);//
-    vertexNormal = normal; //
-
+    vertexColour = color2;
+    vertexNormal = normal;
     gl_Position = modelViewProjectionMatrix * vec4(position0,1);
 }

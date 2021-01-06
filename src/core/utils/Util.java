@@ -234,33 +234,7 @@ public class Util {
 		    	
 		    	tangent = tangent.normalize();
 		    	bitangent = bitangent.normalize();
-		    	
-		    	if (mesh.getVertices()[mesh.getIndices()[i]].getTangent() == null) 
-		    		mesh.getVertices()[mesh.getIndices()[i]].setTangent(new Vec3f(0,0,0));
-		    	if (mesh.getVertices()[mesh.getIndices()[i]].getBitangent() == null) 
-		    		mesh.getVertices()[mesh.getIndices()[i]].setBitangent(new Vec3f(0,0,0));
-		    	if (mesh.getVertices()[mesh.getIndices()[i+1]].getTangent() == null) 
-		    		mesh.getVertices()[mesh.getIndices()[i+1]].setTangent(new Vec3f(0,0,0));
-		    	if (mesh.getVertices()[mesh.getIndices()[i+1]].getBitangent() == null) 
-		    		mesh.getVertices()[mesh.getIndices()[i+1]].setBitangent(new Vec3f(0,0,0));
-		    	if (mesh.getVertices()[mesh.getIndices()[i+2]].getTangent() == null) 
-		    		mesh.getVertices()[mesh.getIndices()[i+2]].setTangent(new Vec3f(0,0,0));
-		    	if (mesh.getVertices()[mesh.getIndices()[i+2]].getBitangent() == null) 
-		    		mesh.getVertices()[mesh.getIndices()[i+2]].setBitangent(new Vec3f(0,0,0));
-		    	
-		    	mesh.getVertices()[mesh.getIndices()[i]].setTangent(mesh.getVertices()[mesh.getIndices()[i]].getTangent().add(tangent));
-		    	mesh.getVertices()[mesh.getIndices()[i]].setBitangent(mesh.getVertices()[mesh.getIndices()[i]].getBitangent().add(bitangent));
-		    	mesh.getVertices()[mesh.getIndices()[i+1]].setTangent(mesh.getVertices()[mesh.getIndices()[i+1]].getTangent().add(tangent));
-		    	mesh.getVertices()[mesh.getIndices()[i+1]].setBitangent(mesh.getVertices()[mesh.getIndices()[i+1]].getBitangent().add(bitangent));
-		    	mesh.getVertices()[mesh.getIndices()[i+2]].setTangent(mesh.getVertices()[mesh.getIndices()[i+2]].getTangent().add(tangent));
-		    	mesh.getVertices()[mesh.getIndices()[i+2]].setBitangent(mesh.getVertices()[mesh.getIndices()[i+2]].getBitangent().add(bitangent));	
 		 }
-		
-		 for (Vertex vertex : mesh.getVertices())
-		    {	
-		    	vertex.setTangent(vertex.getTangent().normalize());
-		    	vertex.setBitangent(vertex.getBitangent().normalize());
-		    }
 	}
 	
 	public static Quaternion normalizePlane(Quaternion plane)

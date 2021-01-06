@@ -2,7 +2,6 @@ package core.kernel;
 
 import core.configs.Default;
 import simpleDC.DcWrapper;
-import shaders.Skydome;
 
 /**
  * 
@@ -14,15 +13,12 @@ import shaders.Skydome;
 public class RenderingEngine {
 	
 	private Window window;
-	
-	private Skydome skydome;
 
 	private DcWrapper dcWrapper;
 	
 	public RenderingEngine()
 	{
 		window = Window.getInstance();
-		skydome = new Skydome();
 		dcWrapper = new DcWrapper();
 	}
 	
@@ -36,8 +32,6 @@ public class RenderingEngine {
 		Camera.getInstance().update();
 		
 		Default.clearScreen();
-		
-		skydome.render();
 
 		dcWrapper.update();
 		dcWrapper.render();

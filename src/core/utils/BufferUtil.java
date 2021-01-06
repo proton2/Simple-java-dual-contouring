@@ -1,15 +1,15 @@
 package core.utils;
 
 import core.math.Matrix4f;
-import core.math.Quaternion;
-import core.math.Vec2f;
-import core.math.Vec3f;
+import core.math.Vec3i;
 import core.model.Vertex;
 import org.lwjgl.BufferUtils;
+import simpleDC.MeshVertex;
 
-import java.nio.DoubleBuffer;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.List;
 
 public class BufferUtil {
 
@@ -22,12 +22,7 @@ public class BufferUtil {
 	{
 		return BufferUtils.createIntBuffer(size);
 	}
-	
-	public static DoubleBuffer createDoubleBuffer(int size)
-	{
-		return BufferUtils.createDoubleBuffer(size);
-	}
-	
+
 	public static IntBuffer createFlippedBuffer(int... values)
 	{
 		IntBuffer buffer = createIntBuffer(values.length);
@@ -36,57 +31,49 @@ public class BufferUtil {
 		
 		return buffer;
 	}
-	
-	public static FloatBuffer createFlippedBuffer(float... values)
-	{
+
+	public static FloatBuffer createFlippedBuffer(float... values) {
 		FloatBuffer buffer = createFloatBuffer(values.length);
 		buffer.put(values);
 		buffer.flip();
-		
 		return buffer;
 	}
-	
-	public static DoubleBuffer createFlippedBuffer(double... values)
-	{
-		DoubleBuffer buffer = createDoubleBuffer(values.length);
+
+	public static ByteBuffer createFlippedBuffer(byte... values) {
+		ByteBuffer buffer = BufferUtils.createByteBuffer(values.length);
 		buffer.put(values);
 		buffer.flip();
-		
 		return buffer;
 	}
 
-	public static FloatBuffer createFlippedBufferAOS(Vertex[] vertices)
-	{
-		FloatBuffer buffer = createFloatBuffer(vertices.length * Vertex.FLOATS);
+	public static IntBuffer createFlippedBuffer(List<Integer> indices) {
+		IntBuffer buffer = createIntBuffer(indices.size());
+		buffer.put(indices.stream().mapToInt(x -> x).toArray());
+		buffer.flip();
 
-		for(int i = 0; i < vertices.length; i++)
-		{
+		return buffer;
+	}
+
+	public static FloatBuffer createFlippedBufferAOS(Vertex[] vertices) {
+		FloatBuffer buffer = createFloatBuffer(vertices.length * 11);
+		for(int i = 0; i < vertices.length; i++) {
 			buffer.put(vertices[i].getPos().getX());
 			buffer.put(vertices[i].getPos().getY());
 			buffer.put(vertices[i].getPos().getZ());
 			buffer.put(vertices[i].getNormal().getX());
 			buffer.put(vertices[i].getNormal().getY());
 			buffer.put(vertices[i].getNormal().getZ());
-			buffer.put(vertices[i].getTextureCoord().getX());
-			buffer.put(vertices[i].getTextureCoord().getY());
-
-			if (vertices[i].getTangent() != null && vertices[i].getBitangent() != null){
-				buffer.put(vertices[i].getTangent().getX());
-				buffer.put(vertices[i].getTangent().getY());
-				buffer.put(vertices[i].getTangent().getZ());
-				buffer.put(vertices[i].getBitangent().getX());
-				buffer.put(vertices[i].getBitangent().getY());
-				buffer.put(vertices[i].getBitangent().getZ());
+			if(vertices[i].getTextureCoord()!=null) {
+				buffer.put(vertices[i].getTextureCoord().getX());
+				buffer.put(vertices[i].getTextureCoord().getY());
 			}
 		}
-
 		buffer.flip();
-
 		return buffer;
 	}
 
 	public static FloatBuffer createDcFlippedBufferAOS(Vertex[] vertices) {
-		FloatBuffer buffer = createFloatBuffer(vertices.length * 6);
+		FloatBuffer buffer = createFloatBuffer(vertices.length * 9);
 		for (Vertex vertice : vertices) {
 			buffer.put(vertice.getPos().getX());
 			buffer.put(vertice.getPos().getY());
@@ -94,112 +81,56 @@ public class BufferUtil {
 			buffer.put(vertice.getNormal().getX());
 			buffer.put(vertice.getNormal().getY());
 			buffer.put(vertice.getNormal().getZ());
+			buffer.put(vertice.getColor().getX());
+			buffer.put(vertice.getColor().getY());
+			buffer.put(vertice.getColor().getZ());
 		}
 		buffer.flip();
 		return buffer;
 	}
-	
-	public static FloatBuffer createFlippedBufferSOA(Vertex[] vertices)
-	{
-		FloatBuffer buffer = createFloatBuffer(vertices.length * Vertex.FLOATS);
-		
-		for(int i = 0; i < vertices.length; i++)
-		{
-			buffer.put(vertices[i].getPos().getX());
-			buffer.put(vertices[i].getPos().getY());
-			buffer.put(vertices[i].getPos().getZ());
+
+	public static IntBuffer createDcFlippedBufferAOS(Vec3i[] vertices) {
+		IntBuffer buffer = createIntBuffer(vertices.length * 3);
+		for (Vec3i vertice : vertices) {
+			buffer.put(vertice.x);
+			buffer.put(vertice.y);
+			buffer.put(vertice.z);
 		}
-		
-		for(int i = 0; i < vertices.length; i++)
-		{
-			buffer.put(vertices[i].getNormal().getX());
-			buffer.put(vertices[i].getNormal().getY());
-			buffer.put(vertices[i].getNormal().getZ());
-		}
-			
-		for(int i = 0; i < vertices.length; i++)
-		{
-			buffer.put(vertices[i].getTextureCoord().getX());
-			buffer.put(vertices[i].getTextureCoord().getY());
-		}	
-		
 		buffer.flip();
-		
 		return buffer;
 	}
-	
-	public static FloatBuffer createFlippedBuffer(Vec3f[] vector)
-	{
-		FloatBuffer buffer = createFloatBuffer(vector.length * Float.BYTES * 3);
-		
-		for (int i = 0; i < vector.length; i++)
-		{
-			buffer.put(vector[i].getX());
-			buffer.put(vector[i].getY());
-			buffer.put(vector[i].getZ());
+
+	public static FloatBuffer createDcFlippedBufferAOS(List<MeshVertex> vertices) {
+		FloatBuffer buffer = createFloatBuffer(vertices.size() * 9);
+		for (Vertex vertice : vertices) {
+			buffer.put(vertice.getPos().getX());
+			buffer.put(vertice.getPos().getY());
+			buffer.put(vertice.getPos().getZ());
+			buffer.put(vertice.getNormal().getX());
+			buffer.put(vertice.getNormal().getY());
+			buffer.put(vertice.getNormal().getZ());
+			buffer.put(vertice.getColor().getX());
+			buffer.put(vertice.getColor().getY());
+			buffer.put(vertice.getColor().getZ());
 		}
-		
 		buffer.flip();
-		
 		return buffer;
 	}
-	
-	public static FloatBuffer createFlippedBuffer(Quaternion[] vector)
-	{
-		FloatBuffer buffer = createFloatBuffer(vector.length * Float.BYTES * 4);
-		
-		for (int i = 0; i < vector.length; i++)
-		{
-			buffer.put(vector[i].getX());
-			buffer.put(vector[i].getY());
-			buffer.put(vector[i].getZ());
-			buffer.put(vector[i].getW());
+
+	public static FloatBuffer createDcFlippedBufferAOS(MeshVertex[] vertices) {
+		FloatBuffer buffer = createFloatBuffer(vertices.length * 9);
+		for (Vertex vertice : vertices) {
+			buffer.put(vertice.getPos().getX());
+			buffer.put(vertice.getPos().getY());
+			buffer.put(vertice.getPos().getZ());
+			buffer.put(vertice.getNormal().getX());
+			buffer.put(vertice.getNormal().getY());
+			buffer.put(vertice.getNormal().getZ());
+			buffer.put(vertice.getColor().getX());
+			buffer.put(vertice.getColor().getY());
+			buffer.put(vertice.getColor().getZ());
 		}
-		
 		buffer.flip();
-		
-		return buffer;
-	}
-	
-	public static FloatBuffer createFlippedBuffer(Vec3f vector)
-	{
-		FloatBuffer buffer = createFloatBuffer(Float.BYTES * 3);
-		
-		buffer.put(vector.getX());
-		buffer.put(vector.getY());
-		buffer.put(vector.getZ());
-		
-		buffer.flip();
-		
-		return buffer;
-	}
-	
-	public static FloatBuffer createFlippedBuffer(Quaternion vector)
-	{
-		FloatBuffer buffer = createFloatBuffer(Float.BYTES * 4);
-		
-		buffer.put(vector.getX());
-		buffer.put(vector.getY());
-		buffer.put(vector.getZ());
-		buffer.put(vector.getW());
-		
-		buffer.flip();
-		
-		return buffer;
-	}
-	
-	public static FloatBuffer createFlippedBuffer(Vec2f[] vector)
-	{
-		FloatBuffer buffer = createFloatBuffer(vector.length * Float.BYTES * 2);
-		
-		for (int i = 0; i < vector.length; i++)
-		{
-			buffer.put(vector[i].getX());
-			buffer.put(vector[i].getY());	
-		}
-		
-		buffer.flip();
-		
 		return buffer;
 	}
 	
@@ -210,21 +141,6 @@ public class BufferUtil {
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
 				buffer.put(matrix.get(i, j));
-		
-		buffer.flip();
-		
-		return buffer;
-	}
-	
-	public static FloatBuffer createFlippedBuffer(Matrix4f[] matrices)
-	{
-		FloatBuffer buffer = createFloatBuffer(4 * 4 * matrices.length);
-		
-		for (Matrix4f matrix : matrices){
-			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-					buffer.put(matrix.get(i, j));
-		}
 		
 		buffer.flip();
 		

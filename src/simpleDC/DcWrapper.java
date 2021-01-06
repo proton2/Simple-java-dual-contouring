@@ -1,5 +1,6 @@
 package simpleDC;
 
+import core.buffers.MeshBuffer;
 import core.buffers.MeshDcVBO;
 import core.configs.CW;
 import core.kernel.Camera;
@@ -10,6 +11,7 @@ import core.model.Vertex;
 import core.renderer.RenderInfo;
 import core.renderer.Renderer;
 import core.scene.GameObject;
+import core.utils.BufferUtil;
 import core.utils.Constants;
 import shaders.DcSimpleShader;
 
@@ -26,7 +28,6 @@ import static org.lwjgl.opengl.GL11.glPolygonMode;
  * Created by proton2 on 28.12.2019.
  */
 public class DcWrapper extends GameObject {
-    private Renderer renderer;
     private OctreeNode root;
     private SimpleDualContouring simpleDc;
     private int thresholdIndex = 0;
@@ -76,25 +77,19 @@ public class DcWrapper extends GameObject {
         root = simpleDc.BuildOctree(new Vec3i(0), octreeSize, THRESHOLDS[thresholdIndex]);
         SimpleDualContouring.GenerateMeshFromOctree(root, vertices, indcies);
 
-        Vertex[] vertArray = vertices.toArray(new Vertex[0]);
-        int[] indices = indcies.stream().mapToInt(x -> x).toArray();
+        MeshBuffer buffer = new MeshBuffer();
+        buffer.setVertices(BufferUtil.createDcFlippedBufferAOS(vertices));
+        buffer.setIndicates(BufferUtil.createFlippedBuffer(indcies));
+        buffer.setNumVertices(vertices.size());
+        buffer.setNumIndicates(indcies.size());
 
-        MeshDcVBO meshBuffer = new MeshDcVBO();
-        meshBuffer.addData(vertArray, indices);
-        renderer = new Renderer(meshBuffer);
+        MeshDcVBO meshBuffer = new MeshDcVBO(buffer);
+        Renderer renderer = new Renderer(meshBuffer);
         renderer.setRenderInfo(new RenderInfo(new CW(), DcSimpleShader.getInstance()));
         addComponent(Constants.RENDERER_COMPONENT, renderer);
     }
 
     public void shutDown() {
         SimpleDualContouring.DestroyOctree(root);
-    }
-
-    private void sleep(long millis){
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 }

@@ -3,6 +3,7 @@ package simpleDC;
 import core.math.Vec3f;
 import core.math.Vec3i;
 import core.math.Vec4f;
+import core.utils.Constants;
 import solver.LevenQefSolver;
 import solver.QEFData;
 import utils.SimplexNoise;
@@ -215,7 +216,7 @@ public class SimpleDualContouring {
 
         if (node.Type != Node_Internal) {
             node.drawInfo.index = vertexBuffer.size();
-            vertexBuffer.add(new MeshVertex(node.drawInfo.position.getVec3f(), node.drawInfo.averageNormal));
+            vertexBuffer.add(new MeshVertex(node.drawInfo.position.getVec3f(), node.drawInfo.averageNormal, Constants.Red));
         }
     }
 

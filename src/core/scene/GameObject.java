@@ -5,7 +5,8 @@ import java.util.HashMap;
 import core.math.Transform;
 
 public class GameObject{
-
+	protected boolean drawWireframe = false;
+	protected boolean refreshMesh = true;
 	private HashMap<String, Component> components;
 	private Transform transform;
 	
@@ -57,5 +58,13 @@ public class GameObject{
 
 	public void setTransform(Transform transform) {
 		this.transform = transform;
+	}
+
+	protected void sleep(long millis){
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -1,6 +1,5 @@
 package core.math;
 
-
 public class Vec3f {
 	
 	public float X;
@@ -39,6 +38,13 @@ public class Vec3f {
 		this.Z = v.getZ();
 	}
 
+	public Vec3f(Vec3i v)
+	{
+		this.X = v.x;
+		this.Y = v.y;
+		this.Z = v.z;
+	}
+
 	public void set(Vec3f v)
 	{
 		this.X = v.getX();
@@ -61,6 +67,10 @@ public class Vec3f {
 	{
 		return (float) Math.sqrt(X*X + Y*Y + Z*Z);
 	}
+
+	public float lengthSquared() {
+		return X * X + Y * Y + Z * Z;
+	}
 	
 	public float dot(Vec3f r)
 	{
@@ -75,6 +85,10 @@ public class Vec3f {
 		
 		return new Vec3f(x,y,z);
 	}
+
+	public Vec3f neg() {
+		return new Vec3f(-X, Y, Z);
+	}
 	
 	public Vec3f normalize()
 	{
@@ -84,6 +98,13 @@ public class Vec3f {
 		Y /= length;
 		Z /= length;
 		
+		return this;
+	}
+
+	public Vec3f scale(float s) {
+		X *= s;
+		Y *= s;
+		Z *= s;
 		return this;
 	}
 	
@@ -159,11 +180,27 @@ public class Vec3f {
 		return new Vec3f(Math.abs(X), Math.abs(Y), Math.abs(Z));
 	}
 	
-	public boolean equals(Vec3f v)
-	{
-		if (X == v.getX() && Y == v.getY() && Z == v.getZ())
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		else return false;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Vec3f other = (Vec3f) obj;
+		if (X != other.getX()) return false;
+		if (Y != other.getY()) return false;
+		if (Z != other.getZ()) return false;
+		return true;
+	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Float.floatToIntBits(X);
+		result = prime * result + Float.floatToIntBits(Y);
+		result = prime * result + Float.floatToIntBits(Z);
+		return result;
 	}
 	
 	public String toString()
@@ -194,7 +231,8 @@ public class Vec3f {
 	public void setZ(float z) {
 		Z = z;
 	}
-	
-	
-	
+
+	public static Vec3f max(Vec3f v, Vec3f dest) {
+		return new Vec3f(Math.max(dest.X, v.X), Math.max(dest.Y, v.Y), Math.max(dest.Z, v.Z));
+	}
 }

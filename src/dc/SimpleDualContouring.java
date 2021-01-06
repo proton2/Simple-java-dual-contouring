@@ -1,36 +1,30 @@
 package dc;
 
-import core.math.Matrix4f;
 import core.math.Vec3f;
-import svd.QefSolver;
-import svd.SVD;
-import utils.Frustum;
+import core.math.Vec3i;
+import core.math.Vec4f;
+import dc.solver.LevenQefSolver;
+import dc.solver.QEFData;
+import dc.utils.SimplexNoise;
 
 import java.util.List;
 
 import static dc.OctreeNodeType.*;
 
-public class Octree {
+public class SimpleDualContouring {
     public static final int MATERIAL_AIR = 0;
     public static final int MATERIAL_SOLID = 1;
-    private static final double BIAS = 1e-1;
 
-    private static final float QEF_ERROR = 1e-6f;
-    private static final int QEF_SWEEPS = 4;
-    private static boolean updateFrustum;
-    private static Matrix4f viewMatrix;
-    private static Matrix4f projectionMatrix;
-
-    private static final Vec3f[] CHILD_MIN_OFFSETS = {
+    private static final Vec3i[] CHILD_MIN_OFFSETS = {
             // needs to match the vertMap from Dual Contouring impl
-            new Vec3f( 0, 0, 0 ),
-            new Vec3f( 0, 0, 1 ),
-            new Vec3f( 0, 1, 0 ),
-            new Vec3f( 0, 1, 1 ),
-            new Vec3f( 1, 0, 0 ),
-            new Vec3f( 1, 0, 1 ),
-            new Vec3f( 1, 1, 0 ),
-            new Vec3f( 1, 1, 1 ),
+            new Vec3i( 0, 0, 0 ),
+            new Vec3i( 0, 0, 1 ),
+            new Vec3i( 0, 1, 0 ),
+            new Vec3i( 0, 1, 1 ),
+            new Vec3i( 1, 0, 0 ),
+            new Vec3i( 1, 0, 1 ),
+            new Vec3i( 1, 1, 0 ),
+            new Vec3i( 1, 1, 1 ),
     };
 
     public static final int[][] edgevmap = {
@@ -39,16 +33,19 @@ public class Octree {
         {0,1},{2,3},{4,5},{6,7}		// z-axis
     };
 
+    public SimpleDualContouring() {
+    }
+
     // -------------------------------------------------------------------------------
-    private static OctreeNode ConstructLeaf(OctreeNode leaf) {
+    private OctreeNode ConstructLeaf(OctreeNode leaf) {
         if (leaf == null || leaf.size != 1) {
             return null;
         }
 
         int corners = 0;
         for (int i = 0; i < 8; i++) {
-            Vec3f cornerPos = leaf.min.add(CHILD_MIN_OFFSETS[i]);
-            float density = Density.Density_Func(cornerPos);
+            Vec3f cornerPos = leaf.min.add(CHILD_MIN_OFFSETS[i]).toVec3f();
+            float density = SimplexNoise.Sample(cornerPos);
 		    int material = density < 0.f ? MATERIAL_SOLID : MATERIAL_AIR;
             corners |= (material << i);
         }
@@ -61,7 +58,7 @@ public class Octree {
 	    int MAX_CROSSINGS = 6;
         int edgeCount = 0;
         Vec3f averageNormal = new Vec3f(0.f);
-        QefSolver qef = new QefSolver();
+        QEFData qef = new QEFData(new LevenQefSolver());
 
         for (int i = 0; i < 12 && edgeCount < MAX_CROSSINGS; i++) {
 		    int c1 = edgevmap[i][0];
@@ -70,50 +67,29 @@ public class Octree {
 		    int m1 = (corners >> c1) & 1;
 		    int m2 = (corners >> c2) & 1;
 
-            if (    (m1 == MATERIAL_AIR && m2 == MATERIAL_AIR) ||
-                    (m1 == MATERIAL_SOLID && m2 == MATERIAL_SOLID))
-            {
+            if ((m1 == MATERIAL_AIR && m2 == MATERIAL_AIR) || (m1 == MATERIAL_SOLID && m2 == MATERIAL_SOLID)) {
                 continue; // no zero crossing on this edge
             }
 
-            Vec3f p1 = leaf.min.add(CHILD_MIN_OFFSETS[c1]);
-            Vec3f p2 = leaf.min.add(CHILD_MIN_OFFSETS[c2]);
+            Vec3f p1 = leaf.min.add(CHILD_MIN_OFFSETS[c1]).toVec3f();
+            Vec3f p2 = leaf.min.add(CHILD_MIN_OFFSETS[c2]).toVec3f();
             Vec3f p = ApproximateZeroCrossingPosition(p1, p2);
             Vec3f n = CalculateSurfaceNormal(p);
-            qef.add(p, n);
+            qef.qef_add_point(p, n);
             averageNormal = averageNormal.add(n);
             edgeCount++;
         }
 
-        Vec3f qefPosition = new Vec3f(qef.getMassPoint());
-        qef.solve(qefPosition, QEF_ERROR, QEF_SWEEPS, QEF_ERROR);
-
         OctreeDrawInfo drawInfo = new OctreeDrawInfo();
-        drawInfo.position = contains(qefPosition, leaf.min, leaf.size) ? qefPosition : qef.getMassPoint();
-        drawInfo.qef = qef.getData();
+        drawInfo.position = qef.solve();
+        drawInfo.qef = qef;
         drawInfo.averageNormal = averageNormal.div((float)edgeCount);//.normalize();
-        SVD.normalize(drawInfo.averageNormal);
+        drawInfo.averageNormal.normalize();
         drawInfo.corners = corners;
 
         leaf.Type = Node_Leaf;
         leaf.drawInfo = drawInfo;
         return leaf;
-    }
-
-    private static boolean isOutFromBounds(Vec3f p, Vec3f min, int size) {
-        Vec3f max = min.add(size);
-        return (p.X < min.X || p.X > max.X ||
-                p.Y < min.Y || p.Y > max.Y ||
-                p.Z < min.Z || p.Z > max.Z);
-    }
-
-    private static boolean contains(Vec3f p, Vec3f min, int size) {
-        return (p.X >= min.X - BIAS &&
-                p.Y >= min.Y - BIAS &&
-                p.Z >= min.Z - BIAS &&
-                p.X <= min.X + size + BIAS &&
-                p.Y <= min.Y + size + BIAS &&
-                p.Z <= min.Z + size + BIAS);
     }
 
     private static OctreeNode SimplifyOctree(OctreeNode node, float threshold) {
@@ -124,7 +100,7 @@ public class Octree {
             return node;
         }
 
-        QefSolver qef = new QefSolver();
+        QEFData qef = new QEFData(new LevenQefSolver());
         int[] signs = { -1, -1, -1, -1, -1, -1, -1, -1 };
         int midsign = -1;
         boolean isCollapsible = true;
@@ -148,9 +124,8 @@ public class Octree {
             return node;    // at least one child is an internal node, can't collapse
         }
 
-        Vec3f position = new Vec3f();
-        float error = qef.solve(position, QEF_ERROR, QEF_SWEEPS, QEF_ERROR);
-        //float error = qef.getError();
+        Vec4f position = qef.solve();
+        float error = qef.getError();
 
         // at this point the masspoint will actually be a sum, so divide to make it the average
         if (error > threshold) {
@@ -179,9 +154,9 @@ public class Octree {
             }
         }
 
-        SVD.normalize(drawInfo.averageNormal);
-        drawInfo.position = contains(position, node.min, node.size) ? position : qef.getMassPoint();
-        drawInfo.qef = qef.getData();
+        drawInfo.averageNormal.normalize();
+        drawInfo.position = position;
+        drawInfo.qef = qef;
 
         for (int i = 0; i < 8; i++) {
             DestroyOctree(node.children[i]);
@@ -203,7 +178,7 @@ public class Octree {
         while (currentT <= 1.f)
         {
             Vec3f p = p0.add(p1.sub(p0).mul(currentT)); // p = p0 + ((p1 - p0) * currentT);
-            float density = Math.abs(Density.Density_Func(p));
+            float density = Math.abs(SimplexNoise.Sample(p));
             if (density < minValue) {
                 minValue = density;
                 t = currentT;
@@ -213,13 +188,17 @@ public class Octree {
         return p0.add((p1.sub(p0)).mul(t)); // p0 + ((p1 - p0) * t);
     }
 
-    private static Vec3f CalculateSurfaceNormal(Vec3f p) {
-	    float H = 0.001f;
-	    float dx = Density.Density_Func(p.add(new Vec3f(H, 0.f, 0.f))) - Density.Density_Func(p.sub(new Vec3f(H, 0.f, 0.f)));
-	    float dy = Density.Density_Func(p.add(new Vec3f(0.f, H, 0.f))) - Density.Density_Func(p.sub(new Vec3f(0.f, H, 0.f)));
-	    float dz = Density.Density_Func(p.add(new Vec3f(0.f, 0.f, H))) - Density.Density_Func(p.sub(new Vec3f(0.f, 0.f, H)));
+    public Vec3f CalculateSurfaceNormal(Vec3f p) {
+        float H = 1f;
+        Vec3f xOffcet = new Vec3f(H, 0.f, 0.f);
+        Vec3f yOffcet = new Vec3f(0.f, H, 0.f);
+        Vec3f zOffcet = new Vec3f(0.f, 0.f, H);
+        float dx = SimplexNoise.Sample(p.add(xOffcet)) - SimplexNoise.Sample(p.sub(xOffcet));
+        float dy = SimplexNoise.Sample(p.add(yOffcet)) - SimplexNoise.Sample(p.sub(yOffcet));
+        float dz = SimplexNoise.Sample(p.add(zOffcet)) - SimplexNoise.Sample(p.sub(zOffcet));
+
         Vec3f v = new Vec3f(dx, dy, dz);
-        SVD.normalize(v);
+        v.normalize();
         return v;
     }
 
@@ -236,20 +215,14 @@ public class Octree {
 
         if (node.Type != Node_Internal) {
             node.drawInfo.index = vertexBuffer.size();
-            vertexBuffer.add(new MeshVertex(node.drawInfo.position, node.drawInfo.averageNormal));
+            vertexBuffer.add(new MeshVertex(node.drawInfo.position.getVec3f(), node.drawInfo.averageNormal));
         }
     }
 
-    private static OctreeNode ConstructOctreeNodes(OctreeNode node)
-    {
+    private OctreeNode ConstructOctreeNodes(OctreeNode node) {
         if (node == null) {
             return null;
         }
-
-//        if (!Frustum.getFrustum(updateFrustum, projectionMatrix, viewMatrix).nodeInFrustum(node.min, node.size)){
-//            return null;
-//        }
-
         if (node.size == 1) {
             return ConstructLeaf(node);
         }
@@ -258,11 +231,8 @@ public class Octree {
         boolean hasChildren = false;
 
         for (int i = 0; i < 8; i++) {
-            OctreeNode child = new OctreeNode();
-            child.size = childSize;
-            child.min = node.min.add(CHILD_MIN_OFFSETS[i].mul(childSize));
-            child.Type = Node_Internal;
-
+            Vec3i childMin = node.min.add(CHILD_MIN_OFFSETS[i].mul(childSize));
+            OctreeNode child = new OctreeNode(childMin, childSize, OctreeNodeType.Node_Internal);
             node.children[i] = ConstructOctreeNodes(child);
             hasChildren |= (node.children[i] != null);
         }
@@ -274,18 +244,8 @@ public class Octree {
         return node;
     }
 
-    public static OctreeNode BuildOctree(boolean updFrustum,
-                                         Matrix4f projection,
-                                         Matrix4f view,
-                                         Vec3f min, int size, float threshold) {
-        viewMatrix = view;
-        projectionMatrix = projection;
-        updateFrustum = updFrustum;
-        OctreeNode root = new OctreeNode();
-        root.min = min;
-        root.size = size;
-        root.Type = Node_Internal;
-
+    public OctreeNode BuildOctree(Vec3i min, int size, float threshold) {
+        OctreeNode root = new OctreeNode(min, size, OctreeNodeType.Node_Internal);
         root = ConstructOctreeNodes(root);
         root = SimplifyOctree(root, threshold);
         return root;

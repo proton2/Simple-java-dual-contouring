@@ -2,8 +2,8 @@ package dc;
 
 import java.util.List;
 
-import static dc.Octree.MATERIAL_AIR;
-import static dc.Octree.edgevmap;
+import static dc.SimpleDualContouring.MATERIAL_AIR;
+import static dc.SimpleDualContouring.edgevmap;
 import static dc.OctreeNodeType.*;
 
 public class Dc {

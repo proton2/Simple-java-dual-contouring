@@ -1,23 +1,19 @@
 package dc;
 
-import core.math.Vec3f;
+import core.math.Vec3i;
 
 public class OctreeNode {
     public OctreeNodeType Type;
-    public Vec3f min;
+    public Vec3i min;
     public int size;
     public OctreeNode[] children;
     public OctreeDrawInfo drawInfo;
 
-    public OctreeNode() {
-        Type = OctreeNodeType.Node_None;
-        min = new Vec3f(0, 0, 0);
-        size = 0;
-        drawInfo = new OctreeDrawInfo();
-
-        children = new OctreeNode[8];
-        for (int i = 0; i < 8; i++) {
-            children[i] = null;
-        }
+    public OctreeNode(Vec3i position, int size, OctreeNodeType type) {
+        this.Type = type;
+        this.min = position;
+        this.size = size;
+        this.drawInfo = new OctreeDrawInfo();
+        this.children = new OctreeNode[8];
     }
 }

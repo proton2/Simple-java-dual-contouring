@@ -1,4 +1,4 @@
-package simpleDualContouring;
+package simpleDC;
 
 import core.math.Vec3f;
 import core.math.Vec3i;
@@ -9,7 +9,7 @@ import utils.SimplexNoise;
 
 import java.util.List;
 
-import static simpleDualContouring.OctreeNodeType.*;
+import static simpleDC.OctreeNodeType.*;
 
 public class SimpleDualContouring {
     public static final int MATERIAL_AIR = 0;

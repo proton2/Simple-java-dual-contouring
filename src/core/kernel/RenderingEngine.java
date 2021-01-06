@@ -1,7 +1,7 @@
 package core.kernel;
 
 import core.configs.Default;
-import simpleDualContouring.DcWrapper;
+import simpleDC.DcWrapper;
 import shaders.Skydome;
 
 /**

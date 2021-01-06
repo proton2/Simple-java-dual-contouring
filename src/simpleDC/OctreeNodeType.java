@@ -1,4 +1,4 @@
-package simpleDualContouring;
+package simpleDC;
 
 public enum OctreeNodeType {
     Node_None,

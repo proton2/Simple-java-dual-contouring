@@ -1,4 +1,4 @@
-package simpleDualContouring;
+package simpleDC;
 
 import core.buffers.MeshDcVBO;
 import core.configs.CW;

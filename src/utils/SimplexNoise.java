@@ -91,18 +91,14 @@ public class SimplexNoise { // Simplex noise in 2D, 3D and 4D
 		return (float) noise(pos.getX() * r, pos.getY() * r, pos.getZ() * r);
 	}
 
-	private static float Cuboid(Vec3f worldPosition, Vec3f origin, Vec3f halfDimensions)
-	{
+	private static float Cuboid(Vec3f worldPosition, Vec3f origin, Vec3f halfDimensions) {
 		Vec3f local_pos = worldPosition.sub(origin);
-		Vec3f pos = local_pos;
-
-		Vec3f d = new Vec3f(Math.abs(pos.X), Math.abs(pos.Y), Math.abs(pos.Z)).sub(halfDimensions);
+		Vec3f d = local_pos.abs().sub(halfDimensions);
 		float m = Math.max(d.X, Math.max(d.Y, d.Z));
 		return Math.min(m, Vec3f.max(d, new Vec3f(0.f)).length());
 	}
 
-	public static float CuboidOrig(Vec3f worldPosition, Vec3f origin, Vec3f halfDimensions)
-	{
+	public static float CuboidOrig(Vec3f worldPosition, Vec3f origin, Vec3f halfDimensions) {
 		Vec3f pos = worldPosition.sub(origin);
 		Vec3f d = new Vec3f(Math.abs(pos.X), Math.abs(pos.Y), Math.abs(pos.Z)).sub(halfDimensions);
 		float m = Math.max(d.X, Math.max(d.Y, d.Z));

@@ -45,9 +45,9 @@ public class DcWrapper extends GameObject {
         indcies = new ArrayList<>();
         simpleDc = new SimpleDualContouring();
 
-        Camera.getInstance().setPosition(new Vec3f(0,15,0));
-        Camera.getInstance().setForward(new Vec3f(1,0,0).normalize());
-        Camera.getInstance().setUp(new Vec3f(0,1,0));
+        Camera.getInstance().setPosition(new Vec3f(-octreeSize/2f,30,-octreeSize/2f));
+        Camera.getInstance().setForward(new Vec3f(0.48f,-0.71f,0.51f).normalize());
+        Camera.getInstance().setUp(new Vec3f(0.49f,0.69f,0.52f));
     }
 
     public void update() {
@@ -74,7 +74,7 @@ public class DcWrapper extends GameObject {
     }
 
     private void renderMesh(){
-        root = simpleDc.BuildOctree(new Vec3i(0), octreeSize, THRESHOLDS[thresholdIndex]);
+        root = simpleDc.BuildOctree(new Vec3i(-octreeSize / 2, -octreeSize / 2, -octreeSize / 2), octreeSize, THRESHOLDS[thresholdIndex]);
         SimpleDualContouring.GenerateMeshFromOctree(root, vertices, indcies);
 
         MeshBuffer buffer = new MeshBuffer();

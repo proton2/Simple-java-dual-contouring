@@ -43,7 +43,7 @@ public class SimplexNoise { // Simplex noise in 2D, 3D and 4D
 	}
 
 	private SimplexNoise(String filename, int worldSizeXZ){
-		densityField = prepareAndStoreDensity(filename, worldSizeXZ);
+		//densityField = prepareAndStoreDensity(filename, worldSizeXZ);
 		SimplexNoise.worldSizeXZ = worldSizeXZ;
 	}
 
@@ -81,9 +81,9 @@ public class SimplexNoise { // Simplex noise in 2D, 3D and 4D
 	}
 
 	public static float Sample(Vec3f pos) {
-		return pos.getY() - Noise(pos) * 8.0f - 8;
-		//return Cuboid(pos);
-		//return Sphere(pos);
+		float terrain = pos.getY() - Noise(pos) * 8.0f - 8;
+		float cube = Cuboid(pos, new Vec3f(64/2, 0, 64/2), new Vec3f(12.f));
+		return Math.max(-cube, terrain);
 	}
 
 	private static float Noise(Vec3f pos) {
@@ -91,19 +91,42 @@ public class SimplexNoise { // Simplex noise in 2D, 3D and 4D
 		return (float) noise(pos.getX() * r, pos.getY() * r, pos.getZ() * r);
 	}
 
-	public static float Cuboid(Vec3f pos) {
-		float radius = (float)64 / 8.0f;
-		Vec3f local = pos.sub(new Vec3f(64 / 2, 64 / 2, 64 / 2));
-		Vec3f d = new Vec3f(Math.abs(local.X), Math.abs(local.Y), Math.abs(local.Z)).sub(new Vec3f(radius, radius, radius));
+	private static float Cuboid(Vec3f worldPosition, Vec3f origin, Vec3f halfDimensions)
+	{
+		Vec3f local_pos = worldPosition.sub(origin);
+		Vec3f pos = local_pos;
+
+		Vec3f d = new Vec3f(Math.abs(pos.X), Math.abs(pos.Y), Math.abs(pos.Z)).sub(halfDimensions);
 		float m = Math.max(d.X, Math.max(d.Y, d.Z));
-		Vec3f max = d;
-		return Math.min(m, max.length());
+		return Math.min(m, Vec3f.max(d, new Vec3f(0.f)).length());
 	}
 
-	public static float Sphere(Vec3f pos) {
-		float radius = (float)64 / 2.0f - 2.0f;
-		Vec3f origin = new Vec3f((64 - 2.0f) * 0.5f);
-		return (pos.sub(origin)).lengthSquared() - radius * radius;
+	public static float CuboidOrig(Vec3f worldPosition, Vec3f origin, Vec3f halfDimensions)
+	{
+		Vec3f pos = worldPosition.sub(origin);
+		Vec3f d = new Vec3f(Math.abs(pos.X), Math.abs(pos.Y), Math.abs(pos.Z)).sub(halfDimensions);
+		float m = Math.max(d.X, Math.max(d.Y, d.Z));
+		return Math.min(m, d.length() > 0 ? d.length() : 0);
+	}
+
+	public static float Density_Func(Vec3f worldPosition)
+	{
+		float MAX_HEIGHT = 10.0f;
+		float noise = BasicFractal(4, 0.5343f, 2.2324f, 0.68324f, new Vec2f(worldPosition.X, worldPosition.Z));
+		//float noise = worldPosition.getY() - Noise(worldPosition) * 8.0f -8;
+		float terrain = worldPosition.Y - (MAX_HEIGHT * noise);
+		//float terrain = worldPosition.getY() - 2;
+
+		float cube = CuboidOrig(worldPosition, new Vec3f(-4.0f, 10.0f, -4.0f), new Vec3f(12.0f, 12.0f, 12.0f));
+		float sphere = Sphere(worldPosition, new Vec3f(15.0f, 2.5f, 1.0f), 16.0f);
+
+		return Math.max(-cube, Math.min(sphere, terrain));
+		//return Math.max(-cube, terrain);
+	}
+
+	public static float Sphere(Vec3f worldPosition, Vec3f origin, float radius) {
+		float magnitude = worldPosition.sub(origin).length();
+		return magnitude - radius;
 	}
 
 	private static Grad grad3[] = { new Grad(1, 1, 0), new Grad(-1, 1, 0),

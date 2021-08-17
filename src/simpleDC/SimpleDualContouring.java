@@ -46,7 +46,7 @@ public class SimpleDualContouring {
         int corners = 0;
         for (int i = 0; i < 8; i++) {
             Vec3f cornerPos = leaf.min.add(CHILD_MIN_OFFSETS[i]).toVec3f();
-            float density = SimplexNoise.Sample(cornerPos);
+            float density = SimplexNoise.Density_Func(cornerPos);
 		    int material = density < 0.f ? MATERIAL_SOLID : MATERIAL_AIR;
             corners |= (material << i);
         }
@@ -179,7 +179,7 @@ public class SimpleDualContouring {
         while (currentT <= 1.f)
         {
             Vec3f p = p0.add(p1.sub(p0).mul(currentT)); // p = p0 + ((p1 - p0) * currentT);
-            float density = Math.abs(SimplexNoise.Sample(p));
+            float density = Math.abs(SimplexNoise.Density_Func(p));
             if (density < minValue) {
                 minValue = density;
                 t = currentT;
@@ -194,9 +194,9 @@ public class SimpleDualContouring {
         Vec3f xOffcet = new Vec3f(H, 0.f, 0.f);
         Vec3f yOffcet = new Vec3f(0.f, H, 0.f);
         Vec3f zOffcet = new Vec3f(0.f, 0.f, H);
-        float dx = SimplexNoise.Sample(p.add(xOffcet)) - SimplexNoise.Sample(p.sub(xOffcet));
-        float dy = SimplexNoise.Sample(p.add(yOffcet)) - SimplexNoise.Sample(p.sub(yOffcet));
-        float dz = SimplexNoise.Sample(p.add(zOffcet)) - SimplexNoise.Sample(p.sub(zOffcet));
+        float dx = SimplexNoise.Density_Func(p.add(xOffcet)) - SimplexNoise.Density_Func(p.sub(xOffcet));
+        float dy = SimplexNoise.Density_Func(p.add(yOffcet)) - SimplexNoise.Density_Func(p.sub(yOffcet));
+        float dz = SimplexNoise.Density_Func(p.add(zOffcet)) - SimplexNoise.Density_Func(p.sub(zOffcet));
 
         Vec3f v = new Vec3f(dx, dy, dz);
         v.normalize();

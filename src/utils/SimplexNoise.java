@@ -91,14 +91,7 @@ public class SimplexNoise { // Simplex noise in 2D, 3D and 4D
 		return (float) noise(pos.getX() * r, pos.getY() * r, pos.getZ() * r);
 	}
 
-	private static float Cuboid(Vec3f worldPosition, Vec3f origin, Vec3f halfDimensions) {
-		Vec3f local_pos = worldPosition.sub(origin);
-		Vec3f d = local_pos.abs().sub(halfDimensions);
-		float m = Math.max(d.X, Math.max(d.Y, d.Z));
-		return Math.min(m, Vec3f.max(d, new Vec3f(0.f)).length());
-	}
-
-	public static float CuboidOrig(Vec3f worldPosition, Vec3f origin, Vec3f halfDimensions) {
+	public static float Cuboid(Vec3f worldPosition, Vec3f origin, Vec3f halfDimensions) {
 		Vec3f pos = worldPosition.sub(origin);
 		Vec3f d = pos.abs().sub(halfDimensions);
 		float m = Math.max(d.X, Math.max(d.Y, d.Z));
@@ -113,7 +106,7 @@ public class SimplexNoise { // Simplex noise in 2D, 3D and 4D
 		float terrain = worldPosition.Y - (MAX_HEIGHT * noise);
 		//float terrain = worldPosition.getY() - 2;
 
-		float cube = CuboidOrig(worldPosition, new Vec3f(-4.0f, 10.0f, -4.0f), new Vec3f(12.0f, 12.0f, 12.0f));
+		float cube = Cuboid(worldPosition, new Vec3f(-4.0f, 10.0f, -4.0f), new Vec3f(12.0f, 12.0f, 12.0f));
 		float sphere = Sphere(worldPosition, new Vec3f(15.0f, 2.5f, 1.0f), 16.0f);
 
 		return Math.max(-cube, Math.min(sphere, terrain));

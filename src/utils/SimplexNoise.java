@@ -100,7 +100,7 @@ public class SimplexNoise { // Simplex noise in 2D, 3D and 4D
 
 	public static float CuboidOrig(Vec3f worldPosition, Vec3f origin, Vec3f halfDimensions) {
 		Vec3f pos = worldPosition.sub(origin);
-		Vec3f d = new Vec3f(Math.abs(pos.X), Math.abs(pos.Y), Math.abs(pos.Z)).sub(halfDimensions);
+		Vec3f d = pos.abs().sub(halfDimensions);
 		float m = Math.max(d.X, Math.max(d.Y, d.Z));
 		return Math.min(m, d.length() > 0 ? d.length() : 0);
 	}
@@ -117,7 +117,7 @@ public class SimplexNoise { // Simplex noise in 2D, 3D and 4D
 		float sphere = Sphere(worldPosition, new Vec3f(15.0f, 2.5f, 1.0f), 16.0f);
 
 		return Math.max(-cube, Math.min(sphere, terrain));
-		//return Math.max(-cube, terrain);
+		//return Math.min(cube, terrain);
 	}
 
 	public static float Sphere(Vec3f worldPosition, Vec3f origin, float radius) {
